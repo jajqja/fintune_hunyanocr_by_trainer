@@ -10,7 +10,7 @@ Place a `.txt` file with the exact same name as the image in the same directory.
 ```
 data/
   img_001.jpg
-  img_001.txt      ← nội dung: "Xin chào thế giới"
+  img_001.txt      ← content: "ground truth text"
   img_002.png
   img_002.txt
 ```
