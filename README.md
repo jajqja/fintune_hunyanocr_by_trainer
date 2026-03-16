@@ -66,3 +66,7 @@ pip install git+https://github.com/huggingface/transformers@82a06db03535c49aa987
 ```bash
 ./train.sh
 ```
+
+## Acknowledge
+
+Thanks you ![luxiaolili/HunyuanOCR_Train](https://github.com/luxiaolili/HunyuanOCR_Train)
