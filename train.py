@@ -293,6 +293,7 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=data_collator,
+        processing_class=processor,
     )
 
     print("--- Starting Training ---")
