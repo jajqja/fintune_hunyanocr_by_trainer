@@ -10,6 +10,9 @@ from datasets import Dataset
 
 from dataloader import load_dataset
 
+# Prompt
+PROMPT = "Extract all information of the document image and represent it in markdown format. Ensure the parsing follows the logical reading order. Do not describe or extract any figures, signatures, or seals."
+
 def scale_image_limit(image: Image.Image, max_pixels: int = 3000000) -> Image.Image:
     """
     Scale ảnh sao cho tổng số pixel không vượt quá max_pixels mà vẫn giữ nguyên tỉ lệ.
@@ -33,10 +36,10 @@ def scale_image_limit(image: Image.Image, max_pixels: int = 3000000) -> Image.Im
 
 def create_sft_collate_fn(processor):
     tokenizer = processor.tokenizer
-    IGNORE = -100
+    IGNORE = -100 
 
-    user_id = tokenizer.convert_tokens_to_ids("<| hy_User |>")
-    assistant_id = tokenizer.convert_tokens_to_ids("<| hy_Assistant |>")
+    user_id = tokenizer.convert_tokens_to_ids("<｜hy_User｜>")
+    assistant_id = tokenizer.convert_tokens_to_ids("<｜hy_Assistant｜>")
 
     def collate_fn(batch_samples):
         batch_input_ids = []
@@ -55,15 +58,16 @@ def create_sft_collate_fn(processor):
                 continue
                 
             try:
-                image = [scale_image_limit(Image.open(image_path).convert("RGB"))]
+                # Scale image to avoid OOM, but keep the aspect ratio
+                image = [scale_image_limit(Image.open(image_path)).convert("RGB")]
             except Exception as e:
                 print(f"Error: Can't open {image_path}: {e}")
                 continue
-            
 
             batch = processor(
                 text=text,
                 images=image,
+                add_generation_prompt=False,
                 return_tensors="pt",
                 padding=False,
             )
@@ -148,34 +152,26 @@ def load_ocr_datasets(data_path):
     full_ds = Dataset.from_list(data_list)
     
     # Chia train/test (ví dụ 90/10)
-    ds_split = full_ds.train_test_split(test_size=0.1)
+    ds_split = full_ds.train_test_split(test_size=0.1, shuffle=True, seed=42)
     ds_train, ds_test = ds_split["train"], ds_split["test"]
 
-    prompt = (
-        "Extract all information of the document image and represent it in markdown format. "
-        "Ensure the parsing follows the logical reading order. "
-        "Do not describe or extract any figures, images, or seals."
-    )
-    
     column_names = ds_train.column_names
 
     ds_train = ds_train.map(
         format_data,
-        fn_kwargs={"prompt": prompt},
         num_proc=4, 
         remove_columns=column_names
     )
 
     ds_test = ds_test.map(
         format_data,
-        fn_kwargs={"prompt": prompt},
         num_proc=4, 
         remove_columns=column_names
     )
     
     return ds_train, ds_test
 
-def format_data(sample, prompt):
+def format_data(sample):
     image_path = sample['image_path']
 
     messages = [
@@ -183,7 +179,7 @@ def format_data(sample, prompt):
             "role": "user",
             "content": [
                 {"type": "image", "image": image_path},
-                {"type": "text", "text": prompt},
+                {"type": "text", "text": PROMPT},
             ],
         },
         {
@@ -224,6 +220,7 @@ def main():
     args = parse_args()
     
     if args.local_rank != -1:
+        # Thiết lập Distributed Data Parallel
         torch.distributed.init_process_group(backend='nccl')
         torch.cuda.set_device(args.local_rank)
     
@@ -286,7 +283,6 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         data_collator=data_collator,
-        processing_class=processor,
     )
 
     print("--- Starting Training ---")
