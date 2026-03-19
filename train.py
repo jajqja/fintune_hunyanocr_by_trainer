@@ -67,7 +67,6 @@ def create_sft_collate_fn(processor):
             batch = processor(
                 text=text,
                 images=image,
-                add_generation_prompt=False,
                 return_tensors="pt",
                 padding=False,
             )
