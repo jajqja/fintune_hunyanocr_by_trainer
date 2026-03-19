@@ -11,7 +11,7 @@ from datasets import Dataset
 from dataloader import load_dataset
 
 # Prompt
-PROMPT = "Extract all information of the document image and represent it in markdown format. Ensure the parsing follows the logical reading order. Do not describe or extract any figures, signatures, or seals."
+PROMPT = "Extract all information from the main body of the image of the Vietnam Certificate of Land Use Rights. Tables should be expressed in Markdown format. Ensure the parsing follows the logical reading order. Replace the land-plot diagram with [Sơ đồ] and any seal or signature with [Con dấu và chữ ký]."
 
 def scale_image_limit(image: Image.Image, max_pixels: int = 3000000) -> Image.Image:
     """
@@ -279,10 +279,11 @@ def main():
         
         logging_steps=args.logging_steps, 
         eval_strategy="epoch",  
-        save_strategy="epoch",  
+        save_strategy="epoch",
+        save_total_limit=1,
         
         bf16=True,   
-        warmup_ratio=0.03,  
+        warmup_ratio=0.1,  
         report_to=["tensorboard"],  
         ddp_find_unused_parameters=args.ddp_find_unused_parameters,
     )
