@@ -1,8 +1,7 @@
 # FINETUNE HUNYUANOCR BY TRAINER
 
-
 ## Dataset Preparation
-The system automatically detects your data if it follows one of these three structures:
+We use Vietnam Certificate of Land Use Rights dataset. The system automatically detects your data if it follows one of these three structures:
 
 ### Structure A: Image + TXT Pairs
 Place a `.txt` file with the exact same name as the image in the same directory.
