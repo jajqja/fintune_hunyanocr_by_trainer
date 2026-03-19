@@ -14,7 +14,7 @@ NUM_GPUS=1
 EPOCHS=10               
 BATCH_SIZE=4           
 GRAD_ACCUM_STEPS=4      
-LEARNING_RATE=2e-5
+LEARNING_RATE=1e-5
 MAX_LENGTH=3000        
 
 # ==================== Environment Setup ====================
