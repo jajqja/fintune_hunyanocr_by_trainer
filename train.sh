@@ -15,7 +15,7 @@ EPOCHS=10
 BATCH_SIZE=4           
 GRAD_ACCUM_STEPS=4      
 LEARNING_RATE=1e-5
-MAX_LENGTH=3000        
+MAX_LENGTH=None        
 
 # ==================== Environment Setup ====================
 echo "Setting up environment variables..."
